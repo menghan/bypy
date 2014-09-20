@@ -1050,6 +1050,7 @@ class ByPy(object):
                 ec = 0
                 try:
                     j = r.json()
+                    print repr(r), repr(j)
                     ec = j['error_code']
                     # error print is done in __dump_exception()
                     # self.__print_error_json(r)
