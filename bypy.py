@@ -1046,6 +1046,7 @@ class ByPy(object):
 			if dumpex:
 				self.__dump_exception(ex, url, pars, r, act)
 			perr("Fatal Exception.\nQuitting...\n")
+			raise
 			onexit(result)
 			# we eat the exception, and use return code as the only
 			# error notification method, we don't want to mix them two
