@@ -44,34 +44,10 @@ and then, change 'ServerAuth' to 'False'
 @deffield    updated: Updated
 '''
 
-# it takes days just to fix you, unicode ...
-# some references
-# https://stackoverflow.com/questions/4374455/how-to-set-sys-stdout-encoding-in-python-3
-# https://stackoverflow.com/questions/492483/setting-the-correct-encoding-when-piping-stdout-in-python
-# http://drj11.wordpress.com/2007/05/14/python-how-is-sysstdoutencoding-chosen/
-# https://stackoverflow.com/questions/11741574/how-to-set-the-default-encoding-to-utf-8-in-python
-# https://stackoverflow.com/questions/2276200/changing-default-encoding-of-python
 from __future__ import unicode_literals
 import os
 import sys
-#reload(sys)
-#sys.setdefaultencoding(SystemEncoding)
 import locale
-SystemLanguageCode, SystemEncoding = locale.getdefaultlocale()
-if SystemEncoding and not sys.platform.startswith('win32'):
-	sysenc = SystemEncoding.upper()
-	if sysenc != 'UTF-8' and sysenc != 'UTF8':
-		err = "You MUST set system locale to 'UTF-8' to support unicode file names.\n" + \
-			"Current locale is '{}'".format(SystemEncoding)
-		ex = Exception(err)
-		print(err)
-		raise ex
-
-if not SystemEncoding:
-	# ASSUME UTF-8 encoding, if for whatever reason,
-	# we can't get the default system encoding
-	print("*WARNING*: Cannot detect the system encoding, assume it's 'UTF-8'")
-	SystemEncoding = 'utf-8'
 
 import codecs
 # no idea who is the asshole that screws the sys.stdout.encoding
@@ -83,7 +59,6 @@ import signal
 import time
 import shutil
 import posixpath
-#import types
 import traceback
 import inspect
 import logging
@@ -96,7 +71,6 @@ import re
 import cPickle as pickle
 import pprint
 import socket
-#from collections import OrderedDict
 from os.path import expanduser
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
@@ -2864,7 +2838,7 @@ right after the '# PCS configuration constants' comment.
 					verbose = args.verbose, debug = args.debug)
 			uargs = []
 			for arg in args.command[1:]:
-				uargs.append(unicode(arg, SystemEncoding))
+				uargs.append(unicode(arg, 'utf-8'))
 			result = getattr(by, args.command[0])(*uargs)
 		else:
 			pr("Error: Command '{}' not available.".format(args.command[0]))
@@ -2882,27 +2856,6 @@ right after the '# PCS configuration constants' comment.
 		# raise
 
 	onexit(result)
-
-def TestRun():
-	import doctest
-	doctest.testmod()
-	return ENoError
-
-def Profile():
-	import cProfile
-	import pstats
-	profile_filename = 'bypy_profile.txt'
-	cProfile.run('main()', profile_filename)
-	statsfile = open("profile_stats.txt", "wb")
-	p = pstats.Stats(profile_filename, stream=statsfile)
-	stats = p.strip_dirs().sort_stats('cumulative')
-	stats.print_stats()
-	statsfile.close()
-	sys.exit(ENoError)
-
-def unused():
-	''' just prevent unused warnings '''
-	inspect.stack()
 
 if __name__ == "__main__":
 	main()
