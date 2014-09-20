@@ -1077,11 +1077,11 @@ class ByPy(object):
 				if i < tries:
 					# algo changed: delay more after each failure
 					delay = RetryDelayInSec * i
-					perr("Waiting {} seconds before retrying...".format(delay))
+					# perr("Waiting {} seconds before retrying...".format(delay))
 					time.sleep(delay)
-					perr("Request Try #{} / {}".format(i + 1, tries))
+					# perr("Request Try #{} / {}".format(i + 1, tries))
 				else:
-					perr("Maximum number ({}) of tries failed.".format(tries))
+					# perr("Maximum number ({}) of tries failed.".format(tries))
 					if self.__quit_when_fail:
 						onexit(EMaxRetry)
 					break
@@ -2769,17 +2769,17 @@ right after the '# PCS configuration constants' comment.
 		if args.PROFILE:
 			return Profile()
 
-		pr("Token file: '{}'".format(TokenFilePath))
-		pr("Hash Cache file: '{}'".format(HashCachePath))
-		pr("App root path at Baidu Yun '{}'".format(AppPcsPath))
-		pr("sys.stdin.encoding = {}".format(sys.stdin.encoding))
-		pr("sys.stdout.encoding = {}".format(sys.stdout.encoding))
+		# pr("Token file: '{}'".format(TokenFilePath))
+		# pr("Hash Cache file: '{}'".format(HashCachePath))
+		# pr("App root path at Baidu Yun '{}'".format(AppPcsPath))
+		# pr("sys.stdin.encoding = {}".format(sys.stdin.encoding))
+		# pr("sys.stdout.encoding = {}".format(sys.stdout.encoding))
 
 		if args.verbose > 0:
 			pr("Verbose level = {}".format(args.verbose))
 			pr("Debug = {}".format(args.debug))
 
-		pr("----\n")
+		# pr("----\n")
 
 		if os.path.exists(HashCachePath):
 			cachesize = getfilesize(HashCachePath)
