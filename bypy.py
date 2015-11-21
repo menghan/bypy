@@ -765,8 +765,8 @@ class cached(object):
     verbose = False
     debug = False
     cache = {}
-    cacheloaded = False
     dirty = False
+    enabled = True
     # we don't do cache loading / unloading here because it's an decorator,
     # and probably multiple instances are created for md5, crc32, etc
     # it's a bit complex, and i thus don't have the confidence to do it in ctor/dtor
@@ -796,21 +796,13 @@ class cached(object):
                                 path, self.f.__name__,
                                 result if isinstance(result, (int, long, float, complex)) else binascii.hexlify(result),
                                 info['size'], info['mtime']))
-                else:
-                    result = self.f(*args)
-                    self.__store(info, path, result)
-            else:
-                result = self.f(*args)
-                entry[file] = {}
-                info = entry[file]
-                self.__store(info, path, result)
-        else:
-            result = self.f(*args)
-            cached.cache[absdir] = {}
-            entry = cached.cache[absdir]
-            entry[file] = {}
-            info = entry[file]
-            self.__store(info, path, result)
+                    return result
+
+        result = self.f(*args)
+        self.loadcache()
+        entry = cached.cache.setdefault(absdir, {})
+        info = entry.setdefault(file, {})
+        self.__store(info, path, result)
 
         return result
 
@@ -841,31 +833,25 @@ class cached(object):
     def loadcache():
         # load cache even we don't use cached hash values,
         # because we will save (possibly updated) and hash values
-        if not cached.cacheloaded:  # no double-loading
-            if cached.verbose:
-                pr("Loading Hash Cache File '{}'...".format(HashCachePath))
+        if cached.verbose:
+            pr("Loading Hash Cache File '{}'...".format(HashCachePath))
 
-            if os.path.exists(HashCachePath):
-                try:
-                    with open(HashCachePath, 'rb') as f:
-                        cached.cache = pickle.load(f)
-                    cached.cacheloaded = True
-                    if cached.verbose:
-                        pr("Hash Cache File loaded.")
-                except (
-                        pickle.PickleError,
-                        # the following is for dealing with corrupted cache file
-                        EOFError, TypeError, ValueError):
-                    perr("Fail to load the Hash Cache, no caching. Exception:\n{}".format(traceback.format_exc()))
-                    cached.cache = {}
-            else:
+        if os.path.exists(HashCachePath):
+            try:
+                with open(HashCachePath, 'rb') as f:
+                    cached.cache = pickle.load(f)
                 if cached.verbose:
-                    pr("Hash Cache File not found, no caching")
+                    pr("Hash Cache File loaded.")
+            except (pickle.PickleError,
+                    # the following is for dealing with corrupted cache file
+                    EOFError, TypeError, ValueError):
+                perr("Fail to load the Hash Cache, no caching. Exception:\n{}".format(traceback.format_exc()))
+                cached.cache = {}
+                cached.enabled = False
         else:
             if cached.verbose:
-                pr("Not loading Hash Cache since 'cacheloaded' is '{}'".format(cached.cacheloaded))
-
-        return cached.cacheloaded
+                pr("Hash Cache File not found, no caching")
+            cached.enabled = False
 
     @staticmethod
     def savecache(force_saving=False):
@@ -895,30 +881,30 @@ class cached(object):
 
     @staticmethod
     def cleancache():
-        if cached.loadcache():
-            for absdir in cached.cache.keys():
-                if not os.path.exists(absdir):
-                    if cached.verbose:
-                        pr("Directory: '{}' no longer exists, removing the cache entries".format(absdir))
-                    cached.dirty = True
-                    del cached.cache[absdir]
-                else:
-                    oldfiles = cached.cache[absdir]
-                    files = {}
-                    needclean = False
-                    for f in oldfiles.keys():
-                        #p = os.path.join(absdir, f)
-                        p = joinpath(absdir, f)
-                        if os.path.exists(p):
-                            files[f] = oldfiles[f]
-                        else:
-                            if cached.verbose:
-                                needclean = True
-                                pr("File '{}' no longer exists, removing the cache entry".format(p))
+        cached.loadcache()
+        for absdir in cached.cache.keys():
+            if not os.path.exists(absdir):
+                if cached.verbose:
+                    pr("Directory: '{}' no longer exists, removing the cache entries".format(absdir))
+                cached.dirty = True
+                del cached.cache[absdir]
+            else:
+                oldfiles = cached.cache[absdir]
+                files = {}
+                needclean = False
+                for f in oldfiles.keys():
+                    #p = os.path.join(absdir, f)
+                    p = joinpath(absdir, f)
+                    if os.path.exists(p):
+                        files[f] = oldfiles[f]
+                    else:
+                        if cached.verbose:
+                            needclean = True
+                            pr("File '{}' no longer exists, removing the cache entry".format(p))
 
-                    if needclean:
-                        cached.dirty = True
-                        cached.cache[absdir] = files
+                if needclean:
+                    cached.dirty = True
+                    cached.cache[absdir] = files
         cached.savecache()
 
 
@@ -3199,13 +3185,8 @@ deleteremote - delete remote files that are not inside the local direcotry, defa
 
     def dumpcache(self):
         ''' Usage: dumpcache - display file hash cache'''
-        if cached.cacheloaded:
-            # pprint.pprint(cached.cache)
-            MyPrettyPrinter().pprint(cached.cache)
-            return ENoError
-        else:
-            perr("Cache not loaded.")
-            return ECacheNotLoaded
+        MyPrettyPrinter().pprint(cached.cache)
+        return ENoError
 
     def cleancache(self):
         ''' Usage: cleancache - remove invalid entries from hash cache file'''
