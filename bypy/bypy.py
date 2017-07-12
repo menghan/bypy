@@ -49,9 +49,10 @@ import subprocess
 import shlex
 from collections import deque
 #from collections import OrderedDict
-from functools import partial
+from functools import partial, wraps
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
+from datetime import datetime
 # unify Python 2 and 3
 if sys.version_info[0] == 2:
 	import urllib as ulp
@@ -543,6 +544,16 @@ class ByPy(object):
 		return const.ENoError if len(errors) == 0 else errors[-1]
 
 	def __multi_process(self, worker, iterator, process = "dl / ul"):
+
+		def worker_deco(f):
+			@wraps(f)
+			def _(*args, **kwargs):
+				self.pv("new work: pid={} time={} args={} kwargs={}".format(os.getpid(), datetime.now(), args, kwargs))
+				return f(*args, **kwargs)
+			return _
+
+		worker = worker_deco(worker)
+
 		if not self.__check_prompt_multiprocess():
 			return const.EArgument
 		self.__warn_multi_processes(process)
