@@ -37,11 +37,8 @@ def colorstr(msg, fg, bg):
 
 def pr(msg):
 	print(msg)
-	# we need to flush the output periodically to see the latest status
-	now = time.time()
-	if now - gvar.last_stdout_flush >= const.PrintFlushPeriodInSec:
-		sys.stdout.flush()
-		gvar.last_stdout_flush = now
+	sys.stdout.flush()
+	gvar.last_stdout_flush = time.time()
 
 def prcolor(msg, fg, bg):
 	if sys.stdout.isatty() and not iswindows():
