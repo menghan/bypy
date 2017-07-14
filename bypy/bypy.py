@@ -1198,7 +1198,7 @@ Possible fixes:
 			else:
 				return const.ENoError
 		else:
-			pinfo("Local and remote file size DOESN'T match")
+			pinfo("Local and remote file size DOESN'T match '{}' {} vs {}".format(self.__current_file, self.__current_file_size, rsize))
 			return const.EHashMismatch
 
 	def __get_file_info_act(self, r, args):
