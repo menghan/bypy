@@ -77,12 +77,12 @@ def pprgr(finish, total, start_time = None, existing = 0,
 		eta = 'ETA: ' + human_time_short(elapsed * remainf / finishf) + \
 				' (' + speed + ', ' + \
 				human_time_short(elapsed) + ' gone)'
-	msg = '\r' + prefix + '[' + segth * '=' + (seg - segth) * '_' + ']' + \
+	msg = prefix + '[' + segth * '=' + (seg - segth) * '_' + ']' + \
 		" {}% ({}/{})".format(percent, human_size(finish, 1), human_size(total, 1)) + \
 		' ' + eta + suffix
 	#msg = '\r' + prefix + '[' + segth * '=' + (seg - segth) * '_' + ']' + \
 	#	" {}% ({}/{})".format(percent, human_size(finish), human_size(total)) + \
 	#	' ' + eta + suffix
-	sys.stderr.write(msg + ' ') # space is used as a clearer
+	sys.stderr.write(msg + ' \n') # space is used as a clearer
 	sys.stderr.flush()
 
