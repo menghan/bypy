@@ -1488,7 +1488,7 @@ get information of the given path (dir / file) at Baidu Yun.
 					ec = self.__upload_slice(remotepath)
 					if ec == const.ENoError:
 						self.pd("Slice MD5 match, continuing next slice")
-						pprgr(f.tell(), self.__current_file_size, start_time, initial_offset)
+						pprgr(f.tell(), self.__current_file_size, start_time, initial_offset, suffix='filename: %s' % self.__current_file)
 						self.__update_progress_entry(fullpath)
 						break
 					elif j < self.__retry:
@@ -1821,7 +1821,7 @@ try to create a file at PCS by combining slices, having MD5s specified
 				if chunk: # filter out keep-alive new chunks
 					f.write(chunk)
 					f.flush()
-					pprgr(f.tell(), rsize, start_time)
+					pprgr(f.tell(), rsize, start_time, suffix='filename: %s' % self.__current_file)
 					# https://stackoverflow.com/questions/7127075/what-exactly-the-pythons-file-flush-is-doing
 					#os.fsync(f.fileno())
 
@@ -1854,7 +1854,7 @@ try to create a file at PCS by combining slices, having MD5s specified
 
 				f.write(r.content)
 				pos = f.tell()
-				pprgr(pos, rsize, start_time, existing = self.__existing_size)
+				pprgr(pos, rsize, start_time, existing = self.__existing_size, suffix='filename: %s' % self.__current_file)
 				if pos - offset == expectedBytes:
 					return const.ENoError
 				else:
