@@ -79,10 +79,7 @@ def pprgr(finish, total, start_time = None, existing = 0,
 				human_time_short(elapsed) + ' gone)'
 	msg = prefix + '[' + segth * '=' + (seg - segth) * '_' + ']' + \
 		" {}% ({}/{})".format(percent, human_size(finish, 1), human_size(total, 1)) + \
-		' ' + eta + suffix
-	#msg = '\r' + prefix + '[' + segth * '=' + (seg - segth) * '_' + ']' + \
-	#	" {}% ({}/{})".format(percent, human_size(finish), human_size(total)) + \
-	#	' ' + eta + suffix
+		' ' + eta + ' ' + suffix
 	sys.stderr.write(msg + ' \n') # space is used as a clearer
 	sys.stderr.flush()
 
