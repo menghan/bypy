@@ -2117,7 +2117,6 @@ To stream a file, you can use the 'mkfifo' trick with omxplayer etc.:
 		dirjs = []
 		filejs = []
 		result = self.__get(pcsurl + 'file', pars, self.__walk_proceed_remote_dir_act, (dirjs, filejs))
-		yield [result, remotepath, dirjs, filejs, args]
 		for f in filejs:
 			yield [result, remotepath, dirjs, [f], args]
 		if result == const.ENoError:
